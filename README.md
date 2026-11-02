@@ -1,47 +1,42 @@
-# swisshacks
+# Client Onboarding Consistency Checker
 
-## Useful links
-[Challenge original repo](https://github.com/SwissHacks-2025/juliusbaer?tab=readme-ov-file)  
-[API docs](https://hackathon-api.mlo.sehlat.io/docs)  
-[Frontend](https://hackathon-frontend.mlo.sehlat.io/)  
-[Leaderboard](https://hackathon-frontend.mlo.sehlat.io/leaderboard)
-## Ideas
-- Check for consistency betwen documents, but also compare documents with real world data, like city name with country, etc.
+Automated KYC check for private banking. For each new client, the system reads
+four documents, cross checks every field between them and decides whether to
+accept or reject the client.
 
-## Design considerations
-We need a way to define how generic fields shall be compared toghether for consistency.
-For it to be versatile, a function could be passed when constructing the field that specifies how it's
-consistency score is calculated. This may just be a formula, or a call to a LLM for it to decide.
+> SwissHacks 2025 · Julius Baer Challenge · Finalist\
+> Team: Bilal Moussaoui El Azrak, Xinshen Xiang Chen, Pau López Pujals,
+> Anouar El Haddadi El Yahyati
 
-Scores may be grouped in consistency categories, for which different limits may be configured.
-Like a maximum amount of detected typos, etc.
+## About the project
 
-## How to Run the Program
+Before a bank onboards a client, an employee checks that the client's documents
+tell the same story: same name, same passport number, same address, same job.
+The challenge turned this into a game. An API sent client cases one by one,
+each with four documents, and teams scored points for every correct accept or
+reject decision.
 
-### Step 1: Create a Python Virtual Environment
-To create a virtual environment on Windows, open your command prompt and run the following command:
+## How it works
 
-```bash
-py -m venv SuizaEnv
-```
+1. The program requests a new client from the challenge API.
+2. Each document is decoded and its fields are extracted:
+   * **Passport** (image): OCR with Tesseract after image preprocessing.
+   * **Account opening form** (PDF): form fields read with PyPDF2.
+   * **Client profile** (Word): text read from the document XML and parsed
+     field by field.
+   * **Description** (free text): an LLM extracts the facts it mentions.
+3. Every field is checked against the value found in the other documents.
+   Differences only in casing or accents count as minor. Different values count
+   as inconsistencies. Free text fields like education and employment are
+   compared by an LLM.
+4. The client is accepted if no inconsistencies are found, and the decision is
+   sent back to the API.
 
-### Step 2: Activate the Virtual Environment
-Activate the virtual environment by running:
+## Tech stack
 
-```bash
-SuizaEnv\Scripts\activate
-```
+* **Language:** Python
+* **Document processing:** Tesseract OCR, Pillow, PyPDF2, PyMuPDF, lxml
+* **AI:** Llama 4 Maverick through OpenRouter
+* **Other:** REST API client with requests, unidecode
 
-### Step 3: Install Dependencies
-With the virtual environment activated, install the required dependencies using:
-
-```bash
-pip install -r requirements.txt
-```
-
-### Step 4: Run the Program
-Finally, execute the program by running:
-
-```bash
-python game_starter.py
-```
+The challenge API is no longer available, so the code can't be run today.
